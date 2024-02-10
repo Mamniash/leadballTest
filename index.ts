@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { response } from 'express'
 import dotenv from 'dotenv'
 import axios from 'axios'
 import csv from 'csvtojson'
@@ -18,35 +18,30 @@ const options = {
 	headers: {
 		Authorization: `Basic ${Buffer.from(user + ':' + password).toString(
 			'base64'
-		)}`,
-	},
+		)}`
+	}
 }
+
+if (process.env.NODE_ENV === 'development') app.use(morgan('dev'))
 
 const converter = csv({
 	checkType: true,
-	headers: headers,
+	headers: headers
 })
-
-if (process.env.NODE_ENV === 'development') app.use(morgan('dev'))
 
 app.get('/', (req, res) => {
 	axios
 		.get(url, options)
-		.then(response => {
-			converter.fromString(response.data).then((jsonArray: Order[]) => {
-				const postData = {
-					average: (getAverageSum(jsonArray) / 100)
-						.toFixed(2)
-						.replace('.', ','),
-				}
-
-				axios
-					.post(`${url}/result/`, postData, options)
-					.then(_response => res.send(postData))
-					.catch(error => res.send(error))
-			})
+		.then((response) => {
+			const postData = converter
+				.fromString(response.data)
+				.then((jsonArray: Order[]) => ({
+					average: getAverageSum(jsonArray)
+				}))
+			return axios.post(`${url}/result/`, postData, options)
 		})
-		.catch(error => {
+		.then(() => res.send('Success!'))
+		.catch((error) => {
 			res.send(error)
 		})
 })

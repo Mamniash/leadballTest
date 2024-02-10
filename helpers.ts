@@ -15,16 +15,16 @@ export const headers = [
 	'price',
 	'date',
 	'deliveryMethod',
-	'title',
+	'title'
 ]
 
 export const getAverageSum = (orders: Order[]) => {
 	const russianOrders = orders.filter(
-		order =>
+		(order) =>
 			order.telephone.startsWith('+7') && order.deliveryMethod === 'pickup'
 	)
 
 	const sum = russianOrders.reduce((total, order) => total + order.price, 0)
 
-	return sum / russianOrders.length
+	return (sum / russianOrders.length / 100).toFixed(2).replace('.', ',')
 }
