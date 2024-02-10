@@ -1,4 +1,4 @@
-import express, { response } from 'express'
+import express from 'express'
 import dotenv from 'dotenv'
 import axios from 'axios'
 import csv from 'csvtojson'
@@ -29,7 +29,7 @@ const converter = csv({
 	headers: headers
 })
 
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
 	axios
 		.get(url, options)
 		.then((response) => {
